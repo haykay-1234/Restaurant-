@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jollof House | Nigerian Kitchen</title>
+  <meta name="description" content="Jollof House serves generous plates of Nigerian comfort food, from smoky party jollof to suya and pepper soup in Lagos." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ============ HEADER / NAV ============ -->
+  <header class="site-header" id="siteHeader">
+    <div class="header-inner">
+      <a href="#home" class="brand">
+        <span class="brand-name">Jollof House</span>
+      </a>
+
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="primaryNav">
+        <span></span><span></span><span></span>
+      </button>
+
+      <nav class="primary-nav" id="primaryNav">
+        <a href="#home">Home</a>
+        <a href="#menu">Menu</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+        <a href="#reserve" class="nav-cta">Book a Table</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ============ HOME ============ -->
+    <section class="hero" id="home">
+      <div class="steam" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+
+      <svg class="bowl-art" viewBox="0 0 320 200" aria-hidden="true">
+        <ellipse cx="160" cy="150" rx="140" ry="28" fill="var(--ink-soft)" />
+        <path d="M30 100 C30 150 90 175 160 175 C230 175 290 150 290 100 Z" fill="var(--bowl)" />
+        <path d="M30 100 C30 150 90 175 160 175 C230 175 290 150 290 100" fill="none" stroke="var(--amber)" stroke-width="3" />
+        <path d="M60 105 Q90 90 120 105 T180 105 T240 105" stroke="var(--paper)" stroke-width="4" fill="none" stroke-linecap="round" opacity="0.85" />
+        <path d="M75 118 Q105 105 135 118 T195 118 T255 118" stroke="var(--paper)" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.6" />
+        <circle cx="110" cy="112" r="6" fill="var(--red)" />
+        <circle cx="200" cy="120" r="5" fill="var(--jade)" />
+        <circle cx="150" cy="108" r="4.5" fill="var(--jade)" />
+      </svg>
+
+      <div class="hero-copy">
+        <p class="eyebrow">Victoria Island · Open till midnight</p>
+        <h1 class="hero-title">
+          <span>Big Flavour</span>
+          <span>Naija Soul</span>
+        </h1>
+        <p class="hero-sub">Smoky party jollof, sizzling suya, and homestyle Nigerian plates. Jollof House brings the warmth of a Lagos table to every gathering.</p>
+        <div class="hero-actions">
+          <a href="#menu" class="btn btn-primary">View the Menu</a>
+          <a href="#reserve" class="btn btn-ghost">Book a Table</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ MENU ============ -->
+    <section class="menu" id="menu">
+      <div class="section-head">
+        <h2>The Menu</h2>
+      </div>
+
+      <div class="menu-groups">
+
+        <div class="menu-group">
+          <h2>From the Kitchen</h2>
+          <div class="menu-item-grid">
+            <a class="menu-item menu-item-link" href="#order" data-item="Party Jollof Rice" data-price="₦8,500">
+              <img src="./JOLOF.jpg" alt="Party jollof rice with grilled chicken" loading="lazy" />
+              <div class="menu-item-info"><span class="item-name">Party Jollof Rice</span><span class="item-price">₦8,500</span></div>
+            </a>
+            <a class="menu-item menu-item-link" href="#order" data-item="Beef Suya Platter" data-price="₦10,500">
+              <img src="./Suya.jpg" alt="Spiced beef suya with onions and tomatoes" loading="lazy" />
+              <div class="menu-item-info"><span class="item-name">Beef Suya Platter</span><span class="item-price">₦10,500</span></div>
+            </a>
+            <a class="menu-item menu-item-link" href="#order" data-item="Egusi &amp; Pounded Yam" data-price="₦9,500">
+              <img src="./yiiin.jpg" alt="Egusi soup with pounded yam" loading="lazy" />
+              <div class="menu-item-info"><span class="item-name">Egusi &amp; Pounded Yam</span><span class="item-price">₦9,500</span></div>
+            </a>
+            <a class="menu-item menu-item-link" href="#order" data-item="Pepper Soup" data-price="₦7,500">
+              <img src="./peper.jpg" alt="Nigerian pepper soup with fresh herbs" loading="lazy" />
+              <div class="menu-item-info"><span class="item-name">Pepper Soup</span><span class="item-price">₦7,500</span></div>
+            </a>
+            <a class="menu-item menu-item-link" href="#order" data-item="Yam and Egg" data-price="₦6,500">
+              <img src="./yam.jpg" alt="Boiled yam served with egg sauce" loading="lazy" />
+              <div class="menu-item-info"><span class="item-name">Yam and Egg</span><span class="item-price">₦6,500</span></div>
+            </a>
+          </div>
+        </div>
+
+        <div class="menu-group">
+          <h2>Small Chops</h2>
+          <div class="menu-item-grid">
+            <a class="menu-item menu-item-link" href="#order" data-item="Puff Puff" data-price="₦3,500">
+              <img src="./puff.jpg" alt="Fresh Nigerian puff puff" loading="lazy" />
+              <div class="menu-item-info"><span class="item-name">Puff Puff</span><span class="item-price">₦3,500</span></div>
+            </a>
+            <a class="menu-item menu-item-link" href="#order" data-item="Peppered Gizzard" data-price="₦5,000">
+              <img src="./gizard.jpg" alt="Peppered gizzard with onions and peppers" loading="lazy" />
+              <div class="menu-item-info"><span class="item-name">Peppered Gizzard</span><span class="item-price">₦5,000</span></div>
+            </a>
+            <a class="menu-item menu-item-link" href="#order" data-item="Fried Plantain" data-price="₦2,500">
+              <img src="./plantain.jpg" alt="Golden fried plantain" loading="lazy" />
+              <div class="menu-item-info"><span class="item-name">Fried Plantain</span><span class="item-price">₦2,500</span></div>
+            </a>
+            <a class="menu-item menu-item-link" href="#order" data-item="Chin Chin" data-price="₦3,000">
+              <img src="./chin chin.jpg" alt="Crunchy Nigerian chin chin snack" loading="lazy" />
+              <div class="menu-item-info"><span class="item-name">Chin Chin</span><span class="item-price">₦3,000</span></div>
+            </a>
+            <a class="menu-item menu-item-link" href="#order" data-item="Coleslaw" data-price="₦2,000">
+              <img src="./coleslaw.jpg" alt="Fresh creamy coleslaw" loading="lazy" />
+              <div class="menu-item-info"><span class="item-name">Coleslaw</span><span class="item-price">₦2,000</span></div>
+            </a>
+          </div>
+        </div>
+
+        <div class="menu-group">
+          <h2>To Drink</h2>
+          <div class="menu-item-grid">
+            <a class="menu-item menu-item-link" href="#order" data-item="Zobo Cooler" data-price="₦2,500">
+              <img src="./zobo.jpg" alt="Chilled zobo hibiscus drink with mint" loading="lazy" />
+              <div class="menu-item-info"><span class="item-name">Zobo Cooler</span><span class="item-price">₦2,500</span></div>
+            </a>
+            <a class="menu-item menu-item-link" href="#order" data-item="Chapman" data-price="₦3,500">
+              <img src="./chapman.jpg" alt="Bright Nigerian Chapman cocktail" loading="lazy" />
+              <div class="menu-item-info"><span class="item-name">Chapman</span><span class="item-price">₦3,500</span></div>
+            </a>
+            <a class="menu-item menu-item-link" href="#order" data-item="Ginger Pineapple Juice" data-price="₦3,000">
+              <img src="./pine.jpg" alt="Fresh ginger pineapple juice over ice" loading="lazy" />
+              <div class="menu-item-info"><span class="item-name">Ginger Pineapple Juice</span><span class="item-price">₦3,000</span></div>
+            </a>
+            <a class="menu-item menu-item-link" href="#order" data-item="Bottled Water" data-price="₦1,000">
+              <img src="./water.jpg" alt="Chilled bottled water" loading="lazy" />
+              <div class="menu-item-info"><span class="item-name">Bottled Water</span><span class="item-price">₦1,000</span></div>
+            </a>
+            <a class="menu-item menu-item-link" href="#order" data-item="Nigerian Lager" data-price="₦3,500">
+              <img src="./lager.jpg" alt="Cold Nigerian lager" loading="lazy" />
+              <div class="menu-item-info"><span class="item-name">Nigerian Lager</span><span class="item-price">₦3,500</span></div>
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ============ ORDER ============ -->
+    <section class="order" id="order">
+      <div class="section-head">
+        <p class="eyebrow">Place Your Order</p>
+        <h2>Order Online</h2>
+      </div>
+
+      <div class="order-layout">
+        <div class="order-menu-list">
+          <h3>Quick Order</h3>
+          <div class="order-links">
+            <a href="#order" class="order-link" data-item="Party Jollof Rice" data-price="₦8,500">Party Jollof Rice — ₦8,500</a>
+            <a href="#order" class="order-link" data-item="Beef Suya Platter" data-price="₦10,500">Beef Suya Platter — ₦10,500</a>
+            <a href="#order" class="order-link" data-item="Egusi &amp; Pounded Yam" data-price="₦9,500">Egusi &amp; Pounded Yam — ₦9,500</a>
+            <a href="#order" class="order-link" data-item="Pepper Soup" data-price="₦7,500">Pepper Soup — ₦7,500</a>
+            <a href="#order" class="order-link" data-item="Puff Puff" data-price="₦3,500">Puff Puff — ₦3,500</a>
+            <a href="#order" class="order-link" data-item="Zobo Cooler" data-price="₦2,500">Zobo Cooler — ₦2,500</a>
+          </div>
+        </div>
+
+        <form class="order-form" id="orderForm" action="https://formspree.io/f/mzepanae" method="POST">
+          <div class="field">
+            <label for="order-name">Name</label>
+            <input type="text" id="order-name" name="name" required />
+          </div>
+
+          <div class="field">
+            <label for="order-email">Email</label>
+            <input type="email" id="order-email" name="email" required />
+          </div>
+
+          <div class="field">
+            <label for="order-phone">Phone</label>
+            <input type="tel" id="order-phone" name="phone" placeholder="(555) 123-4567" />
+          </div>
+
+          <div class="field">
+            <label for="order-item">Menu Item</label>
+            <select id="order-item" name="item" required>
+              <option value="">Select an item</option>
+              <option value="Party Jollof Rice">Party Jollof Rice</option>
+              <option value="Beef Suya Platter">Beef Suya Platter</option>
+              <option value="Egusi &amp; Pounded Yam">Egusi &amp; Pounded Yam</option>
+              <option value="Pepper Soup">Pepper Soup</option>
+              <option value="Yam and Egg">Yam and Egg</option>
+              <option value="Puff Puff">Puff Puff</option>
+              <option value="Peppered Gizzard">Peppered Gizzard</option>
+              <option value="Fried Plantain">Fried Plantain</option>
+              <option value="Chin Chin">Chin Chin</option>
+              <option value="Coleslaw">Coleslaw</option>
+              <option value="Zobo Cooler">Zobo Cooler</option>
+              <option value="Chapman">Chapman</option>
+              <option value="Ginger Pineapple Juice">Ginger Pineapple Juice</option>
+              <option value="Bottled Water">Bottled Water</option>
+              <option value="Nigerian Lager">Nigerian Lager</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="order-address">Delivery address</label>
+            <textarea id="order-address" name="address" rows="3" placeholder="123 Main Street, Apt 4B, City, Postcode" required></textarea>
+          </div>
+
+          <div class="field">
+            <label for="order-notes">Order notes</label>
+            <textarea id="order-notes" name="notes" rows="4" placeholder="Extra pepper, no spice, pickup details..."></textarea>
+          </div>
+
+          <div class="field">
+            <label for="order-card-name">Name on card</label>
+            <input type="text" id="order-card-name" name="card_name" placeholder="Jane Doe" required />
+          </div>
+
+          <div class="field-row payment-row">
+            <div class="field payment-field">
+              <label for="order-card-number">Card number</label>
+              <input type="text" id="order-card-number" name="card_number" inputmode="numeric" maxlength="19" placeholder="1234 5678 9012 3456" required />
+            </div>
+            <div class="field short-field">
+              <label for="order-card-expiry">Expiry</label>
+              <input type="text" id="order-card-expiry" name="card_expiry" maxlength="5" placeholder="MM/YY" required />
+            </div>
+            <div class="field short-field">
+              <label for="order-card-cvv">CVV</label>
+              <input type="password" id="order-card-cvv" name="card_cvv" maxlength="4" placeholder="123" required />
+            </div>
+          </div>
+
+          <input type="hidden" name="_subject" value="New Jollof House order" />
+          <button type="submit" class="btn btn-primary btn-wide">Pay &amp; Place Order</button>
+          <p class="payment-status" id="paymentStatus" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+
+    <!-- ============ ABOUT ============ -->
+    <section class="story" id="about">
+      <div class="story-visual">
+        <img src="./bg image.webp" alt="Warm, plant-filled dining room at Jollof House with pendant lighting and wooden tables" class="story-photo" loading="lazy" />
+      </div>
+      <div class="story-copy">
+        <p class="eyebrow">About Us · Since 2016</p>
+        <h2>Made for the whole table</h2>
+        <p>Jollof House began with one family recipe and a deep love for the generous, joyful food we grew up sharing. Our kitchen layers smoky firewood flavour, bright peppers, and patient cooking into every plate.</p>
+        <p>Come for a quick bowl of pepper soup or settle in with friends. There is always room for one more at our table.</p>
+      </div>
+    </section>
+
+    <!-- ============ CONTACT ============ -->
+    <section class="contact" id="contact">
+      <div class="section-head">
+        <p class="eyebrow">Get In Touch</p>
+        <h2>Contact Us</h2>
+      </div>
+
+      <div class="contact-grid">
+
+        <div class="contact-info">
+          <div class="visit-card">
+            <h3>Hours</h3>
+            <ul class="hours-list">
+              <li><span>Mon – Thu</span><span>11:00am – 10:00pm</span></li>
+              <li><span>Fri – Sat</span><span>11:00am – 12:00am</span></li>
+              <li><span>Sunday</span><span>12:00pm – 9:00pm</span></li>
+            </ul>
+          </div>
+
+          <div class="visit-card">
+            <h3>Address</h3>
+            <p>18 Adeola Odeku Street<br />Victoria Island, Lagos<br />Open for walk-ins &amp; reservations</p>
+            <p class="visit-note">Complimentary parking available behind the restaurant.</p>
+          </div>
+
+          <div class="visit-card">
+            <h3>Reach Us</h3>
+            <p>+234 803 555 0198<br />hello@jollofhouse.ng</p>
+            <p class="visit-note">For parties of 6 or more, please call ahead.</p>
+          </div>
+        </div>
+
+        <form class="contact-form" id="contactForm" action="https://formspree.io/f/xwlendwd" method="POST" novalidate>
+          <div class="field">
+            <label for="cname">Name</label>
+            <input type="text" id="cname" name="cname" required />
+            <span class="field-error" id="err-cname"></span>
+          </div>
+
+          <div class="field">
+            <label for="cemail">Email</label>
+            <input type="email" id="cemail" name="cemail" required />
+            <span class="field-error" id="err-cemail"></span>
+          </div>
+
+          <div class="field">
+            <label for="csubject">Subject</label>
+            <input type="text" id="csubject" name="csubject" required />
+            <span class="field-error" id="err-csubject"></span>
+          </div>
+
+          <div class="field">
+            <label for="cmessage">Message</label>
+            <textarea id="cmessage" name="cmessage" rows="4" required></textarea>
+            <span class="field-error" id="err-cmessage"></span>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-wide">Send Message</button>
+          <p class="form-status" id="contactStatus" role="status" aria-live="polite"></p>
+        </form>
+
+      </div>
+    </section>
+
+    <!-- ============ RESERVE ============ -->
+    <section class="reserve" id="reserve">
+      <div class="section-head">
+        <p class="eyebrow">Join Us</p>
+        <h2>Book a Table</h2>
+      </div>
+
+      <form class="reserve-form" id="reserveForm" action="https://formspree.io/f/xyegdqop" method="POST" novalidate>
+        <div class="field">
+          <label for="name">Name</label>
+          <input type="text" id="name" name="name" required />
+          <span class="field-error" id="err-name"></span>
+        </div>
+
+        <div class="field">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" required />
+          <span class="field-error" id="err-email"></span>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="date">Date</label>
+            <input type="date" id="date" name="date" required />
+            <span class="field-error" id="err-date"></span>
+          </div>
+          <div class="field">
+            <label for="time">Time</label>
+            <input type="time" id="time" name="time" required />
+            <span class="field-error" id="err-time"></span>
+          </div>
+          <div class="field">
+            <label for="guests">Guests</label>
+            <select id="guests" name="guests">
+              <option value="1">1</option>
+              <option value="2" selected>2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6+">6+</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="notes">Notes (optional)</label>
+          <textarea id="notes" name="notes" rows="3" placeholder="Allergies, occasion, seating preference…"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-wide">Request Reservation</button>
+        <p class="form-status" id="formStatus" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+
+  </main>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <span class="brand-name">Jollof House</span>
+      </div>
+      <p class="footer-tag">Nigerian comfort food, Lagos style.</p>
+      <nav class="footer-nav">
+        <a href="#home">Home</a>
+        <a href="#menu">Menu</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+        <a href="#reserve">Reservation</a>
+      </nav>
+      <p class="footer-copy">&copy; <span id="year"></span> Jollof House Nigerian Kitchen. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="./index.js"></script>
+</body>
+</html>
