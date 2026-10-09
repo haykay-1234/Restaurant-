@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initMobileNav();
   initCartSystem();
   initOrderForm();
+  initPaymentReturn();
   initReservationForm();
   initContactForm();
   setFooterYear();
@@ -210,7 +211,7 @@ function initOrderForm() {
     const submitButton = form.querySelector('button[type="submit"]');
     submitButton.disabled = true;
     status.classList.remove('is-error', 'success');
-    status.textContent = 'Sending your order…';
+    status.textContent = 'Preparing secure Paystack checkout…';
 
     try {
       const formData = new FormData(form);
@@ -228,12 +229,9 @@ function initOrderForm() {
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'The order could not be placed.');
-      status.textContent = `Order #${result.orderId} received. Total: ${formatNaira(result.total)}. Payment is due on delivery or pickup.`;
-      status.classList.add('success');
-      form.reset();
-      cart.clear();
-      persistCart();
-      renderCart();
+      if (!result.authorizationUrl) throw new Error('Secure checkout could not be opened. Please try again.');
+      status.textContent = 'Redirecting to Paystack. Your card details are entered securely on Paystack.';
+      window.location.assign(result.authorizationUrl);
     } catch (error) {
       status.textContent = error.message || 'The order could not be placed. Please try again.';
       status.classList.add('is-error');
@@ -241,6 +239,48 @@ function initOrderForm() {
       submitButton.disabled = false;
     }
   });
+}
+
+/* ---------- Verify Paystack checkout when the customer returns ---------- */
+function initPaymentReturn() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('payment') !== 'paystack') return;
+
+  const reference = params.get('reference') || params.get('trxref');
+  const status = document.getElementById('paymentStatus');
+  if (!status) return;
+  status.classList.remove('is-error', 'success');
+
+  if (!reference) {
+    status.textContent = 'Payment was not completed. Your cart is still saved; you can try again.';
+    status.classList.add('is-error');
+    return;
+  }
+
+  status.textContent = 'Confirming your payment securely…';
+  fetch(`/api/payments/verify?reference=${encodeURIComponent(reference)}`)
+    .then(async (response) => {
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Payment verification failed.');
+      if (result.paymentStatus !== 'paid') {
+        status.textContent = `Payment for order #${result.orderId} has not been confirmed. Your cart is still saved.`;
+        status.classList.add('is-error');
+        return;
+      }
+      status.textContent = `Payment confirmed. Order #${result.orderId} is received. Thank you!`;
+      status.classList.add('success');
+      document.getElementById('orderForm')?.reset();
+      cart.clear();
+      persistCart();
+      renderCart();
+    })
+    .catch((error) => {
+      status.textContent = `${error.message} If you were charged, contact the restaurant with your payment receipt.`;
+      status.classList.add('is-error');
+    })
+    .finally(() => {
+      window.history.replaceState({}, document.title, `${window.location.pathname}${window.location.hash}`);
+    });
 }
 
 /* ---------- Reservation form validation ---------- */

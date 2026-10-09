@@ -19,3 +19,5 @@ services:
         generateValue: true
       - key: ADMIN_PASSWORD
         sync: false
+      - key: PAYSTACK_SECRET_KEY
+        sync: false

@@ -11,6 +11,7 @@ const app = express();
 const port = Number(process.env.PORT) || 3000;
 const adminPassword = process.env.ADMIN_PASSWORD;
 const sessionSecret = process.env.ADMIN_SESSION_SECRET;
+const paystackSecretKey = (process.env.PAYSTACK_SECRET_KEY || '').trim();
 const isProduction = process.env.NODE_ENV === 'production';
 
 if (isProduction) app.set('trust proxy', 1);
@@ -60,7 +61,10 @@ function saveOrders() {
 
 app.disable('x-powered-by');
 app.use(helmet({ contentSecurityPolicy: false }));
-app.use(express.json({ limit: '20kb' }));
+app.use(express.json({
+  limit: '20kb',
+  verify: (req, _res, buffer) => { req.rawBody = Buffer.from(buffer); }
+}));
 app.use((req, res, next) => {
   if (/\.(?:db|db-shm|db-wal|json)$/i.test(req.path) || /(?:^|\/)(?:data|server\.js|package(?:-lock)?\.json|README\.md)(?:\/|$)/i.test(req.path)) {
     return res.sendStatus(404);
@@ -90,6 +94,43 @@ function safeEqual(left, right) {
   const leftHash = crypto.createHash('sha256').update(String(left)).digest();
   const rightHash = crypto.createHash('sha256').update(String(right)).digest();
   return crypto.timingSafeEqual(leftHash, rightHash);
+}
+
+async function paystackRequest(endpoint, payload) {
+  if (!paystackSecretKey) throw new Error('Paystack is not configured.');
+  const response = await fetch(`https://api.paystack.co/${endpoint}`, {
+    method: payload ? 'POST' : 'GET',
+    headers: {
+      Authorization: `Bearer ${paystackSecretKey}`,
+      ...(payload ? { 'Content-Type': 'application/json' } : {})
+    },
+    ...(payload ? { body: JSON.stringify(payload) } : {}),
+    signal: AbortSignal.timeout(10000)
+  });
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok || result.status !== true) {
+    throw new Error(result.message || 'Paystack request failed.');
+  }
+  return result.data;
+}
+
+async function verifyAndRecordPayment(reference) {
+  const order = orders.find((existing) => existing.paymentReference === reference);
+  if (!order) return { order: null, paymentStatus: 'not_found' };
+
+  const transaction = await paystackRequest(`transaction/verify/${encodeURIComponent(reference)}`);
+  const isPaid = transaction.status === 'success'
+    && transaction.reference === reference
+    && transaction.amount === order.total * 100
+    && transaction.currency === 'NGN';
+
+  if (isPaid && order.paymentStatus !== 'paid') {
+    order.paymentStatus = 'paid';
+    order.paidAt = new Date().toISOString();
+    saveOrders();
+  }
+
+  return { order, paymentStatus: isPaid ? 'paid' : (transaction.status || 'pending') };
 }
 
 function signSession(expiresAt) {
@@ -128,7 +169,7 @@ function requireAdmin(req, res, next) {
 
 app.get('/api/menu', (_req, res) => res.json(menu));
 
-app.post('/api/orders', orderLimiter, (req, res) => {
+app.post('/api/orders', orderLimiter, async (req, res) => {
   const { name, email, phone = '', address, notes = '', items } = req.body || {};
   if (typeof name !== 'string' || name.trim().length < 2 || name.length > 120) {
     return res.status(400).json({ error: 'Enter a valid name.' });
@@ -160,8 +201,33 @@ app.post('/api/orders', orderLimiter, (req, res) => {
     return res.status(400).json({ error: 'Order total is outside the allowed range.' });
   }
 
+  if (!paystackSecretKey) {
+    return res.status(503).json({ error: 'Online payment is not configured yet. Please contact the restaurant.' });
+  }
+
+  const orderId = orders.reduce((highest, existing) => Math.max(highest, existing.id), 0) + 1;
+  const paymentReference = `JH-${Date.now()}-${crypto.randomBytes(8).toString('hex')}`;
+  const appUrl = process.env.PUBLIC_APP_URL || `${req.protocol}://${req.get('host')}`;
+  let checkout;
+  try {
+    checkout = await paystackRequest('transaction/initialize', {
+      email: email.trim().toLowerCase(),
+      amount: total * 100,
+      currency: 'NGN',
+      reference: paymentReference,
+      callback_url: new URL('/?payment=paystack', appUrl).toString(),
+      metadata: { orderId }
+    });
+  } catch (error) {
+    console.error('Paystack checkout initialization failed:', error.message);
+    return res.status(502).json({ error: 'Could not start Paystack checkout. Please try again.' });
+  }
+  if (!checkout?.authorization_url || checkout.reference !== paymentReference) {
+    return res.status(502).json({ error: 'Paystack returned an invalid checkout response.' });
+  }
+
   const order = {
-    id: orders.reduce((highest, existing) => Math.max(highest, existing.id), 0) + 1,
+    id: orderId,
     name: name.trim(),
     email: email.trim().toLowerCase(),
     phone: phone.trim(),
@@ -170,11 +236,58 @@ app.post('/api/orders', orderLimiter, (req, res) => {
     items: normalizedItems,
     total,
     status: 'pending',
+    paymentStatus: 'unpaid',
+    paymentReference,
     createdAt: new Date().toISOString()
   };
   orders.push(order);
   saveOrders();
-  res.status(201).json({ orderId: order.id, total, status: order.status });
+  res.status(201).json({
+    orderId: order.id,
+    total,
+    status: order.status,
+    authorizationUrl: checkout.authorization_url
+  });
+});
+
+app.get('/api/payments/verify', async (req, res) => {
+  const reference = typeof req.query.reference === 'string' ? req.query.reference : '';
+  if (!reference || reference.length > 100) {
+    return res.status(400).json({ error: 'A valid payment reference is required.' });
+  }
+  if (!paystackSecretKey) {
+    return res.status(503).json({ error: 'Online payment is not configured.' });
+  }
+  try {
+    const result = await verifyAndRecordPayment(reference);
+    if (!result.order) return res.status(404).json({ error: 'Order not found for this payment.' });
+    res.json({ orderId: result.order.id, paymentStatus: result.paymentStatus });
+  } catch (error) {
+    console.error('Paystack payment verification failed:', error.message);
+    res.status(502).json({ error: 'Could not verify payment right now. Please refresh this page shortly.' });
+  }
+});
+
+app.post('/api/paystack/webhook', async (req, res) => {
+  const signature = req.get('x-paystack-signature') || '';
+  const expected = crypto.createHmac('sha512', paystackSecretKey || '')
+    .update(req.rawBody || Buffer.alloc(0))
+    .digest('hex');
+  if (!paystackSecretKey || !signature || !safeEqual(signature, expected)) {
+    return res.sendStatus(401);
+  }
+  if (req.body?.event !== 'charge.success') return res.sendStatus(200);
+
+  const reference = req.body?.data?.reference;
+  if (typeof reference !== 'string') return res.sendStatus(400);
+  try {
+    const result = await verifyAndRecordPayment(reference);
+    if (!result.order) return res.sendStatus(200);
+    res.sendStatus(200);
+  } catch (error) {
+    console.error('Paystack webhook verification failed:', error.message);
+    res.sendStatus(500);
+  }
 });
 
 app.post('/api/admin/login', loginLimiter, (req, res) => {

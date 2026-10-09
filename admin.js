@@ -58,6 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
       details.className = 'admin-order-details';
       addText(details, 'p', '', `${order.email}${order.phone ? ` · ${order.phone}` : ''}`);
       addText(details, 'p', '', order.address);
+      addText(details, 'p', '', `Payment: ${order.paymentStatus === 'paid' ? 'Paid' : 'Unpaid'}`);
       addText(details, 'p', '', order.items.map((item) => `${item.quantity} × ${item.name} (${money(item.lineTotal)})`).join(' · '));
       if (order.notes) addText(details, 'p', 'admin-order-notes', `Notes: ${order.notes}`);
       card.append(details);
