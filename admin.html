@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#17130f" />
+  <title>Orders Dashboard | Jollof House</title>
+  <link rel="stylesheet" href="./style.css" />
+  <link rel="stylesheet" href="./admin.css" />
+  <script src="./admin.js" defer></script>
+</head>
+<body class="admin-page">
+  <header class="site-header admin-header">
+    <div class="header-inner">
+      <a href="/" class="brand"><span class="brand-name">Jollof House</span></a>
+      <a class="admin-back" href="/">Back to restaurant</a>
+    </div>
+  </header>
+  <main class="admin-main">
+    <section class="admin-intro">
+      <p class="eyebrow">Restaurant operations</p>
+      <h1>Orders dashboard</h1>
+      <p>Review incoming orders and update their progress.</p>
+    </section>
+    <section class="admin-panel" id="loginPanel">
+      <h2>Administrator sign in</h2>
+      <form id="loginForm" class="admin-login-form">
+        <label for="adminPassword">Admin password</label>
+        <input id="adminPassword" name="password" type="password" autocomplete="current-password" required minlength="12" />
+        <button class="btn btn-primary" type="submit">Sign in</button>
+        <p class="admin-message" id="loginMessage" role="status"></p>
+      </form>
+    </section>
+    <section class="admin-orders" id="ordersPanel" hidden>
+      <div class="admin-toolbar">
+        <div><h2>Recent orders</h2><p id="orderSummary">Loading orders…</p></div>
+        <div class="admin-toolbar-actions">
+          <button class="btn btn-ghost" id="refreshOrders" type="button">Refresh</button>
+          <button class="btn btn-ghost" id="logoutButton" type="button">Sign out</button>
+        </div>
+      </div>
+      <p class="admin-message" id="dashboardMessage" role="status"></p>
+      <div class="orders-list" id="ordersList"></div>
+    </section>
+  </main>
+</body>
+</html>

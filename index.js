@@ -2,10 +2,15 @@
 // JOLLOF HOUSE — Nigerian Kitchen
 // ============================================
 
+const cart = new Map();
+const productsByName = new Map();
+const productsById = new Map();
+const cartStorageKey = 'jollof-house-cart';
+
 document.addEventListener('DOMContentLoaded', () => {
   initHeaderScroll();
   initMobileNav();
-  initMenuOrderSelection();
+  initCartSystem();
   initOrderForm();
   initReservationForm();
   initContactForm();
@@ -49,24 +54,146 @@ function initMobileNav() {
   });
 }
 
-/* ---------- Menu item order links ---------- */
-function initMenuOrderSelection() {
-  const orderSelect = document.getElementById('order-item');
-  if (!orderSelect) return;
-
-  const selectItem = (item) => {
-    if (!item) return;
-    orderSelect.value = item;
-  };
+/* ---------- Cart and server menu ---------- */
+function initCartSystem() {
+  try {
+    const savedCart = JSON.parse(localStorage.getItem(cartStorageKey) || '[]');
+    if (Array.isArray(savedCart)) {
+      savedCart.forEach(({ id, quantity }) => {
+        if (typeof id === 'string' && Number.isInteger(quantity) && quantity > 0 && quantity <= 50) {
+          cart.set(id, quantity);
+        }
+      });
+    }
+  } catch {
+    localStorage.removeItem(cartStorageKey);
+  }
 
   document.querySelectorAll('.menu-item-link, .order-link').forEach((link) => {
-    link.addEventListener('click', () => {
-      selectItem(link.dataset.item || '');
+    link.addEventListener('click', (event) => {
+      event.preventDefault();
+      const product = productsByName.get(link.dataset.item || '');
+      if (!product) return;
+      changeCartQuantity(product.id, 1);
+      if (link.classList.contains('menu-item-link')) {
+        document.getElementById('order')?.scrollIntoView({ behavior: 'smooth' });
+      }
     });
+  });
+
+  fetch('/api/menu')
+    .then((response) => {
+      if (!response.ok) throw new Error('Could not load the menu. Start the app with npm start.');
+      return response.json();
+    })
+    .then((products) => {
+      products.forEach((product) => {
+        productsById.set(product.id, product);
+        productsByName.set(product.name, product);
+      });
+      for (const id of cart.keys()) {
+        if (!productsById.has(id)) cart.delete(id);
+      }
+      persistCart();
+      renderCart();
+    })
+    .catch(() => {
+      const status = document.getElementById('paymentStatus');
+      if (status) {
+        status.textContent = 'Ordering is temporarily unavailable. Please try again shortly or contact the restaurant.';
+        status.classList.add('is-error');
+      }
+    });
+
+  document.getElementById('cartItems')?.addEventListener('click', (event) => {
+    const button = event.target.closest('button[data-action]');
+    if (!button) return;
+    const id = button.dataset.id;
+    const quantity = cart.get(id) || 0;
+    if (button.dataset.action === 'increase') changeCartQuantity(id, 1);
+    if (button.dataset.action === 'decrease') changeCartQuantity(id, -1);
+    if (button.dataset.action === 'remove') changeCartQuantity(id, -quantity);
   });
 }
 
-/* ---------- Order form with payment UI ---------- */
+function changeCartQuantity(id, change) {
+  const current = cart.get(id) || 0;
+  const next = Math.max(0, Math.min(50, current + change));
+  if (!next) cart.delete(id);
+  else cart.set(id, next);
+  persistCart();
+  renderCart();
+}
+
+function persistCart() {
+  try {
+    localStorage.setItem(cartStorageKey, JSON.stringify([...cart].map(([id, quantity]) => ({ id, quantity }))));
+  } catch {
+    // The cart still works for this page view when browser storage is unavailable.
+  }
+}
+
+function formatNaira(amount) {
+  return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', maximumFractionDigits: 0 }).format(amount);
+}
+
+function renderCart() {
+  const cartItems = document.getElementById('cartItems');
+  if (!cartItems) return;
+  const count = [...cart.values()].reduce((sum, quantity) => sum + quantity, 0);
+  const total = [...cart].reduce((sum, [id, quantity]) => sum + (productsById.get(id)?.price || 0) * quantity, 0);
+  const countElement = document.getElementById('cartCount');
+  const totalElement = document.getElementById('cartTotal');
+  if (countElement) countElement.textContent = `${count} item${count === 1 ? '' : 's'}`;
+  if (totalElement) totalElement.textContent = formatNaira(total);
+  cartItems.replaceChildren();
+
+  const visibleItems = [...cart].filter(([id]) => productsById.has(id));
+  if (!visibleItems.length) {
+    const empty = document.createElement('p');
+    empty.className = 'cart-empty';
+    empty.textContent = 'Your cart is empty. Add a dish from the menu.';
+    cartItems.append(empty);
+    return;
+  }
+
+  visibleItems.forEach(([id, quantity]) => {
+    const product = productsById.get(id);
+    const row = document.createElement('div');
+    row.className = 'cart-row';
+    const description = document.createElement('div');
+    description.className = 'cart-item-description';
+    const name = document.createElement('strong');
+    name.textContent = product.name;
+    const price = document.createElement('span');
+    price.textContent = formatNaira(product.price * quantity);
+    description.append(name, price);
+
+    const controls = document.createElement('div');
+    controls.className = 'cart-controls';
+    controls.append(
+      createCartButton('−', 'decrease', id, `Remove one ${product.name}`),
+      Object.assign(document.createElement('span'), { textContent: quantity }),
+      createCartButton('+', 'increase', id, `Add one ${product.name}`),
+      createCartButton('Remove', 'remove', id, `Remove ${product.name} from cart`)
+    );
+    row.append(description, controls);
+    cartItems.append(row);
+  });
+}
+
+function createCartButton(label, action, id, accessibleName) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = action === 'remove' ? 'cart-remove' : 'cart-quantity-button';
+  button.dataset.action = action;
+  button.dataset.id = id;
+  button.setAttribute('aria-label', accessibleName);
+  button.textContent = label;
+  return button;
+}
+
+/* ---------- Submit an order to the backend ---------- */
 function initOrderForm() {
   const form = document.getElementById('orderForm');
   const status = document.getElementById('paymentStatus');
@@ -74,54 +201,44 @@ function initOrderForm() {
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
-
-    const name = form.name.value.trim();
-    const email = form.email.value.trim();
-    const item = form.item.value.trim();
-    const address = form.address.value.trim();
-    const cardName = form.card_name.value.trim();
-    const cardNumber = form.card_number.value.replace(/\s+/g, '');
-    const cardExpiry = form.card_expiry.value.trim();
-    const cardCvv = form.card_cvv.value.trim();
-
-    if (!name || !email || !item || !address || !cardName || !cardNumber || !cardExpiry || !cardCvv) {
-      status.textContent = 'Please complete all required fields before placing the order.';
+    if (!cart.size) {
+      status.textContent = 'Add at least one item to your cart before placing an order.';
       status.classList.add('is-error');
-      status.classList.remove('success');
       return;
     }
 
-    if (!isValidEmail(email)) {
-      status.textContent = 'Please enter a valid email address.';
-      status.classList.add('is-error');
-      status.classList.remove('success');
-      return;
-    }
-
-    if (cardNumber.length < 12 || cardCvv.length < 3) {
-      status.textContent = 'Please enter a valid card number and CVV.';
-      status.classList.add('is-error');
-      status.classList.remove('success');
-      return;
-    }
-
-    status.classList.remove('is-error');
-    status.textContent = 'Processing your payment...';
+    const submitButton = form.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+    status.classList.remove('is-error', 'success');
+    status.textContent = 'Sending your order…';
 
     try {
-      await fetch(form.action, {
-        method: form.method,
-        headers: { 'Accept': 'application/json' },
-        body: new FormData(form)
+      const formData = new FormData(form);
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.get('name'),
+          email: formData.get('email'),
+          phone: formData.get('phone'),
+          address: formData.get('address'),
+          notes: formData.get('notes'),
+          items: [...cart].map(([id, quantity]) => ({ id, quantity }))
+        })
       });
-
-      status.textContent = 'Successful order received!';
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'The order could not be placed.');
+      status.textContent = `Order #${result.orderId} received. Total: ${formatNaira(result.total)}. Payment is due on delivery or pickup.`;
       status.classList.add('success');
       form.reset();
+      cart.clear();
+      persistCart();
+      renderCart();
     } catch (error) {
-      status.textContent = 'Payment step failed in the browser demo. Please try again.';
+      status.textContent = error.message || 'The order could not be placed. Please try again.';
       status.classList.add('is-error');
-      status.classList.remove('success');
+    } finally {
+      submitButton.disabled = false;
     }
   });
 }
